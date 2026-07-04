@@ -240,6 +240,23 @@
 </div>
 
 <script>
+  const SUPABASE_URL = 'https://tifnbttittgwdoazqxta.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_UqffY6kzah8KGP1bTmONDw_h-hWx0TT';
+
+  async function sendLog(action, detail, status, message = '') {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/logs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify({ app: 'zipcode-search', action, detail, status, message })
+      });
+    } catch (_) {}
+  }
+
   const zipInput  = document.getElementById('zipInput');
   const clearBtn  = document.getElementById('clearBtn');
   const searchBtn = document.getElementById('searchBtn');
@@ -297,6 +314,7 @@
       copyBtn.textContent = '📋 住所をコピー';
       copyBtn.classList.remove('copied');
       document.getElementById('addrCard').classList.remove('hidden');
+      await sendLog('search', raw, 'success', pref + city + town);
 
       // 2. 緯度経度（zipcloud → なければNominatimでフォールバック）
       let lat = parseFloat(r.latitude);
@@ -346,6 +364,7 @@
       setTimeout(() => map.invalidateSize(), 100);
 
     } catch (e) {
+      await sendLog('search', zipInput.value, 'error', e.message);
       showError('エラー: ' + e.message);
     } finally {
       spinner.classList.remove('show');
