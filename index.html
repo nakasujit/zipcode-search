@@ -303,15 +303,15 @@
       let lon = parseFloat(r.longitude);
 
       if (!lat || !lon) {
+        // 国土地理院ジオコーダーAPIでフォールバック
         const query = encodeURIComponent(pref + city + town);
-        const nRes  = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${query}&countrycodes=jp&format=json&limit=1`,
-          { headers: { 'User-Agent': 'zipcode-search-app' } }
+        const gRes  = await fetch(
+          `https://msearch.gsi.go.jp/address-search/AddressSearch?q=${query}`
         );
-        const nJson = await nRes.json();
-        if (!nJson.length) { showError('緯度経度の取得に失敗しました'); return; }
-        lat = parseFloat(nJson[0].lat);
-        lon = parseFloat(nJson[0].lon);
+        const gJson = await gRes.json();
+        if (!gJson.length) { showError('緯度経度の取得に失敗しました'); return; }
+        lon = parseFloat(gJson[0].geometry.coordinates[0]);
+        lat = parseFloat(gJson[0].geometry.coordinates[1]);
       }
 
       // 3. 天気取得（Open-Meteo）
