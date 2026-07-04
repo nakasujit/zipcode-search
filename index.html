@@ -346,7 +346,7 @@
       setTimeout(() => map.invalidateSize(), 100);
 
     } catch (e) {
-      showError('通信エラーが発生しました。しばらくしてお試しください。');
+      showError('エラー: ' + e.message);
     } finally {
       spinner.classList.remove('show');
       searchBtn.disabled = false;
