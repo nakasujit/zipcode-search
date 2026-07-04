@@ -298,11 +298,21 @@
       copyBtn.classList.remove('copied');
       document.getElementById('addrCard').classList.remove('hidden');
 
-      // 2. 緯度経度（zipcloudのレスポンスから直接取得）
-      const lat = parseFloat(r.latitude);
-      const lon = parseFloat(r.longitude);
+      // 2. 緯度経度（zipcloud → なければNominatimでフォールバック）
+      let lat = parseFloat(r.latitude);
+      let lon = parseFloat(r.longitude);
 
-      if (!lat || !lon) { showError('緯度経度の取得に失敗しました'); return; }
+      if (!lat || !lon) {
+        const query = encodeURIComponent(pref + city + town);
+        const nRes  = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${query}&countrycodes=jp&format=json&limit=1`,
+          { headers: { 'User-Agent': 'zipcode-search-app' } }
+        );
+        const nJson = await nRes.json();
+        if (!nJson.length) { showError('緯度経度の取得に失敗しました'); return; }
+        lat = parseFloat(nJson[0].lat);
+        lon = parseFloat(nJson[0].lon);
+      }
 
       // 3. 天気取得（Open-Meteo）
       const wRes  = await fetch(
