@@ -298,17 +298,11 @@
       copyBtn.classList.remove('copied');
       document.getElementById('addrCard').classList.remove('hidden');
 
-      // 2. 緯度経度取得（Nominatim）
-      const query = encodeURIComponent(pref + city + town + ' 日本');
-      const nRes  = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`, {
-        headers: { 'Accept-Language': 'ja' }
-      });
-      const nJson = await nRes.json();
+      // 2. 緯度経度（zipcloudのレスポンスから直接取得）
+      const lat = parseFloat(r.latitude);
+      const lon = parseFloat(r.longitude);
 
-      if (!nJson.length) { showError('地図・天気の取得に失敗しました'); return; }
-
-      const lat = parseFloat(nJson[0].lat);
-      const lon = parseFloat(nJson[0].lon);
+      if (!lat || !lon) { showError('緯度経度の取得に失敗しました'); return; }
 
       // 3. 天気取得（Open-Meteo）
       const wRes  = await fetch(
